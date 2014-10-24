@@ -9,8 +9,8 @@ OPTIMIZATION = -O2
 
 #########################################################################
 
-SRC=$(wildcard  *.c) \
-	core/stm32f4xx_it.c core/system_stm32f4xx.c \
+SRC=$(wildcard  *.c libs/mcugui/*.c libs/*.c) \
+	core/stm32f4xx_it.c core/system_stm32f4xx.c core/syscalls.c \
 
 ASRC=core/startup_stm32f429_439xx.s
 OBJECTS= $(SRC:.c=.o) $(ASRC:.s=.o)

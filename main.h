@@ -4,15 +4,15 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 
-#define LED3_PIN                         GPIO_Pin_13
-#define LED3_GPIO_PORT                   GPIOG
-#define LED3_GPIO_CLK                    RCC_AHB1Periph_GPIOG  
-
-#define LED4_PIN                         GPIO_Pin_14
-#define LED4_GPIO_PORT                   GPIOG
-#define LED4_GPIO_CLK                    RCC_AHB1Periph_GPIOG  
+#define LED_WIDTH 40
+#define LED_HEIGHT 30
 
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
+void setLedXY(uint16_t x,uint16_t y, uint8_t r,uint8_t g,uint8_t b);
+void invLedXY(uint16_t x, uint16_t y);
+void getLedXY(uint16_t x, uint16_t y, uint8_t* r,uint8_t* g, uint8_t* b);
+
+float pythagorasf( float side1, float side2 );
 
 #endif
