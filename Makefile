@@ -79,6 +79,12 @@ clean:
 
 tools/flash/st-flash:
 	make -C tools
+tools/gdbserver/st-util:
+	make -C tools/gdbserver
+
+debug: tools/gdbserver/st-util
+	arm-none-eabi-gdb template.elf  -ex 'tar ext :4242'
+
 
 flash: tools/flash/st-flash all
 
