@@ -51,7 +51,7 @@
   * @brief  I2C Init structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t I2C_ClockSpeed;          /*!< Specifies the clock frequency.
                                          This parameter must be set to a value lower than 400kHz */

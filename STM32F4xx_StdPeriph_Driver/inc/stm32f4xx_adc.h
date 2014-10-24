@@ -50,7 +50,7 @@
 /** 
   * @brief   ADC Init structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t ADC_Resolution;                /*!< Configures the ADC resolution dual mode. 
                                                This parameter can be a value of @ref ADC_resolution */                                   
@@ -81,7 +81,7 @@ typedef struct
 /** 
   * @brief   ADC Common Init structure definition  
   */ 
-typedef struct 
+typedef struct  __attribute__((__packed__))
 {
   uint32_t ADC_Mode;                      /*!< Configures the ADC to operate in 
                                                independent or multi mode. 

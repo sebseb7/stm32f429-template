@@ -51,7 +51,7 @@
   * @brief  DAC Init structure definition
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t DAC_Trigger;                      /*!< Specifies the external trigger for the selected DAC channel.
                                                   This parameter can be a value of @ref DAC_trigger_selection */

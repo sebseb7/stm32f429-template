@@ -44,7 +44,7 @@
 /** 
   * @brief  Timing parameters For NOR/SRAM Banks  
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_AddressSetupTime;       /*!< Defines the number of HCLK cycles to configure
                                              the duration of the address setup time. 
@@ -85,7 +85,7 @@ typedef struct
 /** 
   * @brief  FMC NOR/SRAM Init structure definition
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_Bank;                /*!< Specifies the NOR/SRAM memory bank that will be used.
                                           This parameter can be a value of @ref FMC_NORSRAM_Bank */
@@ -149,7 +149,7 @@ typedef struct
 /** 
   * @brief  Timing parameters For FMC NAND and PCCARD Banks
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_SetupTime;      /*!< Defines the number of HCLK cycles to setup address before
                                      the command assertion for NAND-Flash read or write access
@@ -180,7 +180,7 @@ typedef struct
 /** 
   * @brief  FMC NAND Init structure definition
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_Bank;              /*!< Specifies the NAND memory bank that will be used.
                                       This parameter can be a value of @ref FMC_NAND_Bank */
@@ -214,7 +214,7 @@ typedef struct
   * @brief  FMC PCCARD Init structure definition
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_Waitfeature;    /*!< Enables or disables the Wait feature for the Memory Bank.
                                     This parameter can be any value of @ref FMC_Wait_feature */
@@ -239,7 +239,7 @@ typedef struct
   * @brief  Timing parameters for FMC SDRAM Banks
   */
   
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_LoadToActiveDelay;      /*!< Defines the delay between a Load Mode Register command and 
                                             an active or Refresh command in number of memory clock cycles.
@@ -276,7 +276,7 @@ typedef struct
   */
 
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_CommandMode;            /*!< Defines the command issued to the SDRAM device.
                                             This parameter can be a value of @ref FMC_Command_Mode. */
@@ -296,7 +296,7 @@ typedef struct
   * @brief  FMC SDRAM Init structure definition
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FMC_Bank;                   /*!< Specifies the SDRAM memory bank that will be used.
                                           This parameter can be a value of @ref FMC_SDRAM_Bank */

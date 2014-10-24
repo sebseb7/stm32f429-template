@@ -50,7 +50,7 @@
 /** 
   * @brief   CRYP Init structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t CRYP_AlgoDir;   /*!< Encrypt or Decrypt. This parameter can be a 
                                 value of @ref CRYP_Algorithm_Direction */
@@ -67,7 +67,7 @@ typedef struct
 /** 
   * @brief   CRYP Key(s) structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t CRYP_Key0Left;  /*!< Key 0 Left  */
   uint32_t CRYP_Key0Right; /*!< Key 0 Right */
@@ -81,7 +81,7 @@ typedef struct
 /** 
   * @brief   CRYP Initialization Vectors (IV) structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t CRYP_IV0Left;  /*!< Init Vector 0 Left  */
   uint32_t CRYP_IV0Right; /*!< Init Vector 0 Right */
@@ -92,7 +92,7 @@ typedef struct
 /** 
   * @brief  CRYP context swapping structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   /*!< Current Configuration */
   uint32_t CR_CurrentConfig;

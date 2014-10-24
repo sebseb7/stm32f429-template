@@ -51,7 +51,7 @@
   * @brief  SAI Block Init structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t SAI_AudioMode;           /*!< Specifies the SAI Block Audio Mode.
                                          This parameter can be a value of @ref SAI_Block_Mode */
@@ -93,7 +93,7 @@ typedef struct
   * @brief  SAI Block Frame Init structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
 
   uint32_t SAI_FrameLength;         /*!< Specifies the Frame Length, the number of SCK clocks 
@@ -128,7 +128,7 @@ typedef struct
   * @brief   SAI Block Slot Init Structure definition
   */    
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t SAI_FirstBitOffset;      /*!< Specifies the position of first data transfer bit in the slot.
                                          This parameter must be a number between 0 and 24. 

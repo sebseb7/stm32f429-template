@@ -51,7 +51,7 @@
   * @brief  NVIC Init Structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint8_t NVIC_IRQChannel;                    /*!< Specifies the IRQ channel to be enabled or disabled.
                                                    This parameter can be an enumerator of @ref IRQn_Type 

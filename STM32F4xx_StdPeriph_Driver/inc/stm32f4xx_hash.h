@@ -50,7 +50,7 @@
 /** 
   * @brief   HASH Init structure definition
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t HASH_AlgoSelection; /*!< SHA-1, SHA-224, SHA-256 or MD5. This parameter
                                     can be a value of @ref HASH_Algo_Selection */
@@ -66,7 +66,7 @@ typedef struct
 /** 
   * @brief  HASH message digest result structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t Data[8];      /*!< Message digest result : 8x 32bit wors for SHA-256,
                                                       7x 32bit wors for SHA-224,
@@ -77,7 +77,7 @@ typedef struct
 /** 
   * @brief  HASH context swapping structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t HASH_IMR; 
   uint32_t HASH_STR;      

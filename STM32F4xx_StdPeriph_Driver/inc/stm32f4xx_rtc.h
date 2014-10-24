@@ -50,7 +50,7 @@
 /** 
   * @brief  RTC Init structures definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t RTC_HourFormat;   /*!< Specifies the RTC Hour Format.
                              This parameter can be a value of @ref RTC_Hour_Formats */
@@ -65,7 +65,7 @@ typedef struct
 /** 
   * @brief  RTC Time structure definition  
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint8_t RTC_Hours;    /*!< Specifies the RTC Time Hour.
                         This parameter must be set to a value in the 0-12 range
@@ -85,7 +85,7 @@ typedef struct
 /** 
   * @brief  RTC Date structure definition  
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint8_t RTC_WeekDay; /*!< Specifies the RTC Date WeekDay.
                         This parameter can be a value of @ref RTC_WeekDay_Definitions */
@@ -103,7 +103,7 @@ typedef struct
 /** 
   * @brief  RTC Alarm structure definition  
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   RTC_TimeTypeDef RTC_AlarmTime;     /*!< Specifies the RTC Alarm Time members. */
 

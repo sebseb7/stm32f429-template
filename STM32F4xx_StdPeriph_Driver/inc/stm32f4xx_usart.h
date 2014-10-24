@@ -51,7 +51,7 @@
   * @brief  USART Init Structure definition  
   */ 
   
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t USART_BaudRate;            /*!< This member configures the USART communication baud rate.
                                            The baud rate is computed using the following formula:
@@ -84,7 +84,7 @@ typedef struct
   * @brief  USART Clock Init Structure definition  
   */ 
   
-typedef struct
+typedef struct __attribute__((__packed__))
 {
 
   uint16_t USART_Clock;   /*!< Specifies whether the USART clock is enabled or disabled.

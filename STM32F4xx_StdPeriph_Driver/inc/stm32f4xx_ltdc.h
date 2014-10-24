@@ -45,7 +45,7 @@
   * @brief  LTDC Init structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_HSPolarity;                 /*!< configures the horizontal synchronization polarity.
                                                  This parameter can be one value of @ref LTDC_HSPolarity */
@@ -97,7 +97,7 @@ typedef struct
   * @brief  LTDC Layer structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_HorizontalStart;            /*!< Configures the Window Horizontal Start Position.
                                                  This parameter must range from 0x000 to 0xFFF. */
@@ -151,20 +151,20 @@ typedef struct
   * @brief  LTDC Position structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_POSX;                         /*!<  Current X Position */
   uint32_t LTDC_POSY;                         /*!<  Current Y Position */
 } LTDC_PosTypeDef;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_BlueWidth;                        /*!< Blue width */
   uint32_t LTDC_GreenWidth;                       /*!< Green width */
   uint32_t LTDC_RedWidth;                         /*!< Red width */
 } LTDC_RGBTypeDef;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_ColorKeyBlue;               /*!< Configures the color key blue value. 
                                                  This parameter must range from 0x00 to 0xFF. */
@@ -176,7 +176,7 @@ typedef struct
                                                  This parameter must range from 0x00 to 0xFF. */
 } LTDC_ColorKeying_InitTypeDef;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t LTDC_CLUTAdress;                 /*!< Configures the CLUT address.
                                                  This parameter must range from 0x00 to 0xFF. */

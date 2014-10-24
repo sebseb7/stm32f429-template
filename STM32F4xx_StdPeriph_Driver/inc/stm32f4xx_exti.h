@@ -77,7 +77,7 @@ typedef enum
   * @brief  EXTI Init Structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t EXTI_Line;               /*!< Specifies the EXTI lines to be enabled or disabled.
                                          This parameter can be any combination value of @ref EXTI_Lines */

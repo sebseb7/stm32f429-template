@@ -45,7 +45,7 @@
   * @brief  DMA2D Init structure definition  
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t DMA2D_Mode;                           /*!< configures the DMA2D transfer mode.
                                                  This parameter can be one value of @ref DMA2D_MODE */
@@ -98,7 +98,7 @@ typedef struct
 
 
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t DMA2D_FGMA;                           /*!< configures the DMA2D foreground memory address.
                                                  This parameter must be range from 0x00000000 to 0xFFFFFFFF. */
@@ -135,7 +135,7 @@ typedef struct
 } DMA2D_FG_InitTypeDef;
 
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t DMA2D_BGMA;                           /*!< configures the DMA2D background memory address.
                                                  This parameter must be range from 0x00000000 to 0xFFFFFFFF. */

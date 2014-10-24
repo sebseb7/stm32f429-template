@@ -48,7 +48,7 @@
 /** 
   * @brief   DCMI Init structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint16_t DCMI_CaptureMode;      /*!< Specifies the Capture Mode: Continuous or Snapshot.
                                        This parameter can be a value of @ref DCMI_Capture_Mode */
@@ -75,7 +75,7 @@ typedef struct
 /** 
   * @brief   DCMI CROP Init structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint16_t DCMI_VerticalStartLine;      /*!< Specifies the Vertical start line count from which the image capture
                                              will start. This parameter can be a value between 0x00 and 0x1FFF */
@@ -94,7 +94,7 @@ typedef struct
 /** 
   * @brief   DCMI Embedded Synchronisation CODE Init structure definition  
   */ 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint8_t DCMI_FrameStartCode; /*!< Specifies the code of the frame start delimiter. */
   uint8_t DCMI_LineStartCode;  /*!< Specifies the code of the line start delimiter. */

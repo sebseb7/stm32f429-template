@@ -92,16 +92,18 @@ void switch_layer(void)
 
 
 	//takes 1.2ms
-	//for (uint32_t index = current_layer; index < current_layer+240*320*2; index+=4)
-	//{
-	//	*(__IO uint32_t*)(index) = 0;
-	//} 
+		GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
+	for (uint32_t index = current_layer; index < current_layer+240*320*2; index+=4)
+	{
+		*(__IO uint32_t*)(index) = 0;
+	} 
+		GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
 	
 	// takes 6ms
 	//memset(current_layer, 0, 240*320*2);
 	
 	// takes 1.2ms to clear the framebuffer == 220k cylces or 3cycles per pixel
-	DMA2D_InitTypeDef      DMA2D_InitStruct;
+/*	DMA2D_InitTypeDef      DMA2D_InitStruct;
 	DMA2D_DeInit();
 	DMA2D_InitStruct.DMA2D_Mode = DMA2D_R2M;       
 	DMA2D_InitStruct.DMA2D_CMode = DMA2D_RGB565;      
@@ -118,7 +120,7 @@ void switch_layer(void)
 
 	while(DMA2D_GetFlagStatus(DMA2D_FLAG_TC) == RESET)
 	{
-	}
+	}*/
 	// __WFE()
 
 }
@@ -200,8 +202,7 @@ int main(void)
 
 	RCC_GetClocksFreq(&RCC_Clocks);
 	/* SysTick end of count event each 1ms */
-	//SysTick_Config(RCC_Clocks.HCLK_Frequency / 10000);
-	SysTick_Config(180000000 / 10000);
+	SysTick_Config(RCC_Clocks.HCLK_Frequency / 10000);
 
 	RCC_AHB1PeriphClockCmd(LED3_GPIO_CLK, ENABLE);
 	RCC_AHB1PeriphClockCmd(LED3_GPIO_CLK, ENABLE);
@@ -266,7 +267,6 @@ int main(void)
 			touch_x = TP_State->Y;
 		}
 
-		GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
 		frame();
 		/*draw_filledCircle(20+((sini(j*128))/234),20+((sini(j*64))/327),15.0f,0,0,0);
 		draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
@@ -281,7 +281,6 @@ int main(void)
 		draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,255,255);
 		*/
 		draw_filledCircle(touch_x,touch_y,15.0f,0,255,255);
-		GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
 		draw_number_inv_8x6(100,100,10000/diff,4,'0');
 		draw_number_inv_8x6(100,120,touch_x,4,'0');
 		draw_number_inv_8x6(100,130,touch_y,4,'0');

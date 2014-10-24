@@ -50,7 +50,7 @@
 /** 
   * @brief  Timing parameters For NOR/SRAM Banks  
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FSMC_AddressSetupTime;       /*!< Defines the number of HCLK cycles to configure
                                              the duration of the address setup time. 
@@ -91,7 +91,7 @@ typedef struct
 /** 
   * @brief  FSMC NOR/SRAM Init structure definition
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FSMC_Bank;                /*!< Specifies the NOR/SRAM memory bank that will be used.
                                           This parameter can be a value of @ref FSMC_NORSRAM_Bank */
@@ -149,7 +149,7 @@ typedef struct
 /** 
   * @brief  Timing parameters For FSMC NAND and PCCARD Banks
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FSMC_SetupTime;      /*!< Defines the number of HCLK cycles to setup address before
                                      the command assertion for NAND Flash read or write access
@@ -180,7 +180,7 @@ typedef struct
 /** 
   * @brief  FSMC NAND Init structure definition
   */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FSMC_Bank;              /*!< Specifies the NAND memory bank that will be used.
                                       This parameter can be a value of @ref FSMC_NAND_Bank */
@@ -214,7 +214,7 @@ typedef struct
   * @brief  FSMC PCCARD Init structure definition
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t FSMC_Waitfeature;    /*!< Enables or disables the Wait feature for the Memory Bank.
                                     This parameter can be any value of @ref FSMC_Wait_feature */

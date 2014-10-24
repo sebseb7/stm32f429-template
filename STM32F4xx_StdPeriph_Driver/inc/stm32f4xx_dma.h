@@ -51,7 +51,7 @@
   * @brief  DMA Init structure definition
   */
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t DMA_Channel;            /*!< Specifies the channel used for the specified stream. 
                                         This parameter can be a value of @ref DMA_channel */
