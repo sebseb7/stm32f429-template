@@ -83,7 +83,7 @@ tools/gdbserver/st-util:
 	make -C tools/gdbserver
 
 debug: tools/gdbserver/st-util
-	arm-none-eabi-gdb template.elf  -ex 'tar ext :4242'
+	arm-none-eabi-gdb template.elf -ex 'shell tools/gdbserver/st-util &'  -ex 'tar ext :4242'
 
 
 flash: tools/flash/st-flash all
