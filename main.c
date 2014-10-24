@@ -4,8 +4,6 @@
 
 /* manual: http://www.st.com/web/en/resource/technical/document/reference_manual/DM00031020.pdf */
 
-
-
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ioe.h"
@@ -37,14 +35,16 @@ static uint32_t current_layer=0xD0000000+0x50000;
 
 void setLedXY(uint16_t x,uint16_t y, uint8_t r,uint8_t g,uint8_t b)
 {
+	if (x >= LED_WIDTH) return;
+	if (y >= LED_HEIGHT) return;
 	y=239-y;
 
-	*(__IO uint16_t*)(current_layer + (2*(240*x+y))) = (( (r   >> 3) & 0x001f ) << 11 | ( (g >> 2) & 0x003f ) << 5 | ((b  >> 3) & 0x001f));
+	*(__IO uint16_t*)(current_layer + (2*(240*x+y))) |= (( (r   >> 3) & 0x001f ) << 11 | ( (g >> 2) & 0x003f ) << 5 | ((b  >> 3) & 0x001f));
 }
 
 void getLedXY(uint16_t x, uint16_t y, uint8_t* red,uint8_t* green, uint8_t* blue) {
-	//	if (x >= LED_WIDTH) return;
-	//	if (y >= LED_HEIGHT) return;
+	if (x >= LED_WIDTH) return;
+	if (y >= LED_HEIGHT) return;
 	y=239-y;
 
 	uint16_t rgb565 = *(__IO uint16_t*)(current_layer + (2*(240*x+y)));
@@ -56,9 +56,9 @@ void getLedXY(uint16_t x, uint16_t y, uint8_t* red,uint8_t* green, uint8_t* blue
 
 
 void invLedXY(uint16_t x, uint16_t y) {
+	if (x >= LED_WIDTH) return;
+	if (y >= LED_HEIGHT) return;
 	y=239-y;
-	//	if (x >= LED_WIDTH) return;
-	//	if (y >= LED_HEIGHT) return;
 	uint16_t rgb565 = *(__IO uint16_t*)(current_layer + (2*(240*x+y)));
 
 	uint8_t r = 255 - ((uint8_t) (rgb565 >> 11)<<3);
@@ -67,60 +67,78 @@ void invLedXY(uint16_t x, uint16_t y) {
 	*(__IO uint16_t*)(current_layer + (2*(240*x+y))) = (( (r   >> 3) & 0x001f ) << 11 | ( (g >> 2) & 0x003f ) << 5 | ((b  >> 3) & 0x001f));
 }
 
+/*void dma_mem_clear(uint32_t base)
+{
+		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2 , ENABLE);
+		volatile unsigned long ulToCopy = 0;
+		DMA2_Stream0->NDTR = 64;                                    // the number of long word transfers to be made (max. 0xffff)
+		DMA2_Stream0->PAR = (unsigned long)&ulToCopy;                           // address of long word to be transfered
+		DMA2_Stream0->M0AR = base;                                // address of first destination long word
+		DMA2_Stream0->CR = (DMA_MemoryInc_Enable | DMA_PeripheralDataSize_Word | DMA_MemoryDataSize_Word | DMA_Priority_Medium | DMA_DIR_MemoryToMemory | DMA_SxCR_TCIE); // set up DMA operation
+		DMA2_Stream0->CR |= DMA_SxCR_EN;                                        // start operation
+		while ((DMA2->LISR & DMA_IT_TCIF0) == 0) { };        // wait until the DMA transfer has terminated
+		DMA2->LIFCR = (DMA_IT_TCIF0 | DMA_IT_HTIF0 | DMA_IT_DMEIF0 | DMA_IT_FEIF0 | DMA_IT_DMEIF0); // clear flags
+		DMA2->LISR = 0;
+		DMA2_Stream0->CR = 0;                                                   // mark that the DMA stream is free for use again
+}
+*/
 
+
+#define LAYER_A  0xD0000000
+#define LAYER_B (0xD0000000+0x50000)
 
 void switch_layer(void)
 {
 
-	if(current_layer == 0xD0000000)
+	if(current_layer == LAYER_A)
 	{
-		LTDC_Layer1->CFBAR=((uint32_t)0xD0000000);
+		LTDC_Layer1->CFBAR=((uint32_t)LAYER_A);
 		LTDC_ReloadConfig(LTDC_VBReload);
-		while(LTDC_Layer1->CFBAR != ((uint32_t)0xD0000000));
-		current_layer=0xD0000000+0x50000;
+		while(LTDC_Layer1->CFBAR != ((uint32_t)LAYER_A));
+		current_layer=LAYER_B;
 	}
 	else
 	{
-		LTDC_Layer1->CFBAR=((uint32_t)0xD0000000+0x50000);
+		LTDC_Layer1->CFBAR=((uint32_t)LAYER_B);
 		LTDC_ReloadConfig(LTDC_VBReload);
-		while(LTDC_Layer1->CFBAR != ((uint32_t)0xD0000000+0x50000));
-		current_layer=0xD0000000;
+		while(LTDC_Layer1->CFBAR != ((uint32_t)LAYER_B));
+		current_layer=LAYER_A;
 	}
 
-	
+
 
 
 
 	//takes 1.2ms
-		GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
+//	dma_mem_clear(current_layer);
+	
 	for (uint32_t index = current_layer; index < current_layer+240*320*2; index+=4)
 	{
 		*(__IO uint32_t*)(index) = 0;
 	} 
-		GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
-	
+
 	// takes 6ms
 	//memset(current_layer, 0, 240*320*2);
-	
-	// takes 1.2ms to clear the framebuffer == 220k cylces or 3cycles per pixel
-/*	DMA2D_InitTypeDef      DMA2D_InitStruct;
-	DMA2D_DeInit();
-	DMA2D_InitStruct.DMA2D_Mode = DMA2D_R2M;       
-	DMA2D_InitStruct.DMA2D_CMode = DMA2D_RGB565;      
-	DMA2D_InitStruct.DMA2D_OutputGreen = 0;      
-	DMA2D_InitStruct.DMA2D_OutputBlue = 0;     
-	DMA2D_InitStruct.DMA2D_OutputRed = 0;                
-	DMA2D_InitStruct.DMA2D_OutputAlpha = 0x0F;                  
-	DMA2D_InitStruct.DMA2D_OutputMemoryAdd = current_layer;                
-	DMA2D_InitStruct.DMA2D_OutputOffset = 0;                
-	DMA2D_InitStruct.DMA2D_NumberOfLine = 240;            
-	DMA2D_InitStruct.DMA2D_PixelPerLine = 320;
-	DMA2D_Init(&DMA2D_InitStruct); 
-	DMA2D_StartTransfer();
 
-	while(DMA2D_GetFlagStatus(DMA2D_FLAG_TC) == RESET)
-	{
-	}*/
+	// takes 1.2ms to clear the framebuffer == 220k cylces or 3cycles per pixel
+	/*	DMA2D_InitTypeDef      DMA2D_InitStruct;
+		DMA2D_DeInit();
+		DMA2D_InitStruct.DMA2D_Mode = DMA2D_R2M;       
+		DMA2D_InitStruct.DMA2D_CMode = DMA2D_RGB565;      
+		DMA2D_InitStruct.DMA2D_OutputGreen = 0;      
+		DMA2D_InitStruct.DMA2D_OutputBlue = 0;     
+		DMA2D_InitStruct.DMA2D_OutputRed = 0;                
+		DMA2D_InitStruct.DMA2D_OutputAlpha = 0x0F;                  
+		DMA2D_InitStruct.DMA2D_OutputMemoryAdd = current_layer;                
+		DMA2D_InitStruct.DMA2D_OutputOffset = 0;                
+		DMA2D_InitStruct.DMA2D_NumberOfLine = 240;            
+		DMA2D_InitStruct.DMA2D_PixelPerLine = 320;
+		DMA2D_Init(&DMA2D_InitStruct); 
+		DMA2D_StartTransfer();
+
+		while(DMA2D_GetFlagStatus(DMA2D_FLAG_TC) == RESET)
+		{
+		}*/
 	// __WFE()
 
 }
@@ -234,7 +252,7 @@ int main(void)
 	{
 	}
 
-  static TP_STATE* TP_State; 
+	static TP_STATE* TP_State; 
 
 	LTDC_Layer1->CFBAR=((uint32_t)0xD0000000);
 	LTDC_ReloadConfig(LTDC_VBReload);
@@ -242,7 +260,7 @@ int main(void)
 
 	uint16_t j  = 0;
 
-	init();
+	//init();
 	uint32_t ctick = tick;
 
 	uint16_t touch_x = 100;
@@ -259,32 +277,36 @@ int main(void)
 		{
 			j=0;
 		}
-		TP_State = IOE_TP_GetState();
+	GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
+if((j % 8) == 0)
+{
+	TP_State = IOE_TP_GetState();
 
 		if(TP_State->TouchDetected)
 		{
 			touch_y = 239-TP_State->X;
 			touch_x = TP_State->Y;
 		}
+}
+	GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
 
-		frame();
-		/*draw_filledCircle(20+((sini(j*128))/234),20+((sini(j*64))/327),15.0f,0,0,0);
-		draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
-		draw_filledCircle(20+((sini((j+150)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
-		draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+350)*64))/327),15.0f,255,0,255);
-		draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,255);
+		//frame();
+		draw_filledCircle(20+((sini(j*128))/234),20+((sini(j*64))/327),15.0f,0,0,0);
+		  draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
+		  draw_filledCircle(20+((sini((j+150)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
+		  draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+350)*64))/327),15.0f,255,0,255);
+		  draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,255);
 
-		draw_filledCircle(20+((sini(j*64))/234),20+((sini(j*64))/327),15.0f,255,0,0);
-		draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
-		draw_filledCircle(20+((sini((j+150)*64))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
-		draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+350)*128))/327),15.0f,255,0,255);
-		draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,255,255);
-		*/
+		  draw_filledCircle(20+((sini(j*64))/234),20+((sini(j*64))/327),15.0f,255,0,0);
+		  draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
+		  draw_filledCircle(20+((sini((j+150)*64))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
+		  draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+350)*128))/327),15.0f,255,0,255);
+		  draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,255,255);
+		  
 		draw_filledCircle(touch_x,touch_y,15.0f,0,255,255);
 		draw_number_inv_8x6(100,100,10000/diff,4,'0');
 		draw_number_inv_8x6(100,120,touch_x,4,'0');
 		draw_number_inv_8x6(100,130,touch_y,4,'0');
-		draw_number_inv_8x6(100,150,(RCC_Clocks.HCLK_Frequency / 1000000),8,'0');
 		switch_layer();
 	}
 }
