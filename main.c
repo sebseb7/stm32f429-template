@@ -8,6 +8,7 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ioe.h"
 
+#include "libs/mcugui/button.h"
 #include "libs/mcugui/circle.h"
 #include "libs/mcugui/text.h"
 #include "libs/armmath.h"
@@ -17,7 +18,7 @@ static __IO uint32_t tick;
 
 void Delay(__IO uint32_t nTime)
 { 
-	TimingDelay = nTime;
+	TimingDelay = nTime*10;
 
 	while(TimingDelay != 0);
 }
@@ -39,7 +40,7 @@ void setLedXY(uint16_t x,uint16_t y, uint8_t r,uint8_t g,uint8_t b)
 	if (y >= LED_HEIGHT) return;
 	y=239-y;
 
-	*(__IO uint16_t*)(current_layer + (2*(240*x+y))) |= (( (r   >> 3) & 0x001f ) << 11 | ( (g >> 2) & 0x003f ) << 5 | ((b  >> 3) & 0x001f));
+	*(__IO uint16_t*)(current_layer + (2*(240*x+y))) = (( (r   >> 3) & 0x001f ) << 11 | ( (g >> 2) & 0x003f ) << 5 | ((b  >> 3) & 0x001f));
 }
 
 void getLedXY(uint16_t x, uint16_t y, uint8_t* red,uint8_t* green, uint8_t* blue) {
@@ -86,14 +87,32 @@ void invLedXY(uint16_t x, uint16_t y) {
 
 #define LAYER_A  0xD0000000
 #define LAYER_B (0xD0000000+0x50000)
+	static TP_STATE* TP_State; 
+	
+	uint16_t touch_x = 100;
+	uint16_t touch_y = 100;
 
 void switch_layer(void)
 {
+	static uint32_t ij = 0;
+
+	ij++;
+
 
 	if(current_layer == LAYER_A)
 	{
 		LTDC_Layer1->CFBAR=((uint32_t)LAYER_A);
 		LTDC_ReloadConfig(LTDC_VBReload);
+		if((ij % 8) == 0)
+		{
+			TP_State = IOE_TP_GetState();
+
+			if(TP_State->TouchDetected)
+			{
+				touch_y = 239-TP_State->X;
+				touch_x = TP_State->Y;
+			}
+		}
 		while(LTDC_Layer1->CFBAR != ((uint32_t)LAYER_A));
 		current_layer=LAYER_B;
 	}
@@ -101,6 +120,16 @@ void switch_layer(void)
 	{
 		LTDC_Layer1->CFBAR=((uint32_t)LAYER_B);
 		LTDC_ReloadConfig(LTDC_VBReload);
+		if((ij % 8) == 0)
+		{
+			TP_State = IOE_TP_GetState();
+
+			if(TP_State->TouchDetected)
+			{
+				touch_y = 239-TP_State->X;
+				touch_x = TP_State->Y;
+			}
+		}
 		while(LTDC_Layer1->CFBAR != ((uint32_t)LAYER_B));
 		current_layer=LAYER_A;
 	}
@@ -142,84 +171,13 @@ void switch_layer(void)
 	// __WFE()
 
 }
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-static uint8_t *bzr_a, *bzr_b, *bzr_c;
-static uint8_t *t_bzr_a, *t_bzr_b, *t_bzr_c;
-
-
-static void init(void) {
-	bzr_a = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*bzr_a));
-	bzr_b = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*bzr_b));
-	bzr_c = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*bzr_c));
-	t_bzr_a = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*t_bzr_a));
-	t_bzr_b = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*t_bzr_b));
-	t_bzr_c = malloc(LED_WIDTH * LED_HEIGHT * sizeof(*t_bzr_c));
-
-	for(int y = 0, p = 0; y < LED_HEIGHT; y++) {
-		for (int x = 0; x < LED_WIDTH; x++, p++) {
-			bzr_a[p] = rand() & 0xFF;
-			bzr_b[p] = rand() & 0xFF;
-			bzr_c[p] = rand() & 0xFF;
-		}
-	}
-}
-
-
-
-static void frame(void) {
-	for(int y = 0, p = 0; y < LED_HEIGHT; y++) {
-		for (int x = 0; x < LED_WIDTH; x++, p++) {
-			/* Compute neighbor averages, with wrap-around. */
-			int16_t sa = 0, sb = 0, sc = 0;
-			for(int j = y -1 ; j < y + 2; j++) {
-				for(int i = x - 1; i < x + 2; i++) {
-					int q =
-						(j < 0 ? j + LED_HEIGHT : j >= LED_HEIGHT ? j - LED_HEIGHT : j) * LED_WIDTH +
-						(i < 0 ? i + LED_WIDTH : i >= LED_WIDTH ? i - LED_WIDTH : i);
-					sa += bzr_a[q];
-					sb += bzr_b[q];
-					sc += bzr_c[q];
-				}
-			}
-			/* This should be 9 but then it dies... */
-			sa /= 9;
-			sb /= 9;
-			sc /= 9;
-
-			int16_t ta = (sa * (259 + sb - sc)) >> 8;
-			int16_t tb = (sb * (259 + sc - sa)) >> 8;
-			int16_t tc = (sc * (259 + sa - sb)) >> 8;
-			t_bzr_a[p] = MIN(255, ta);
-			t_bzr_b[p] = MIN(255, tb);
-			t_bzr_c[p] = MIN(255, tc);
-
-			for(uint8_t a = 0;a<8;a++)
-			{
-				for(uint8_t b = 0;b<8;b++)
-				{
-					setLedXY(x*8+a, y*8+b, t_bzr_a[p], t_bzr_b[p], t_bzr_c[p]);
-				}
-			}
-		}
-	}    
-
-	for(int y = 0, p = 0; y < LED_HEIGHT; y++) {
-		for (int x = 0; x < LED_WIDTH; x++, p++) {
-			bzr_a[p] = t_bzr_a[p];
-			bzr_b[p] = t_bzr_b[p];
-			bzr_c[p] = t_bzr_c[p];
-		}
-	}
-}
 
 int main(void)
 {
 	RCC_ClocksTypeDef RCC_Clocks;
 
 	RCC_GetClocksFreq(&RCC_Clocks);
-	/* SysTick end of count event each 1ms */
+	/* SysTick end of count event each 0.1ms */
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 10000);
 
 	RCC_AHB1PeriphClockCmd(LED3_GPIO_CLK, ENABLE);
@@ -252,7 +210,6 @@ int main(void)
 	{
 	}
 
-	static TP_STATE* TP_State; 
 
 	LTDC_Layer1->CFBAR=((uint32_t)0xD0000000);
 	LTDC_ReloadConfig(LTDC_VBReload);
@@ -260,53 +217,51 @@ int main(void)
 
 	uint16_t j  = 0;
 
-	//init();
 	uint32_t ctick = tick;
+	uint32_t diff_buf=0;
+	uint32_t diff=0;
 
-	uint16_t touch_x = 100;
-	uint16_t touch_y = 100;
 	while (1)
 	{
-		uint32_t diff = tick-ctick;
+//		GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
+//		GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
+		diff += tick-ctick;
 		ctick = tick;
 
-		j+=2;
+		j+=1;
 
 
 		if(j >= 256)
 		{
 			j=0;
 		}
-	GPIO_SetBits(LED3_GPIO_PORT, LED3_PIN);
-if((j % 8) == 0)
-{
-	TP_State = IOE_TP_GetState();
-
-		if(TP_State->TouchDetected)
+		if((j % 32) == 0)
 		{
-			touch_y = 239-TP_State->X;
-			touch_x = TP_State->Y;
+			diff_buf=diff/32;
+			diff=0;
 		}
-}
-	GPIO_ResetBits(LED3_GPIO_PORT, LED3_PIN);
 
-		//frame();
 		draw_filledCircle(20+((sini(j*128))/234),20+((sini(j*64))/327),15.0f,0,0,0);
-		  draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
-		  draw_filledCircle(20+((sini((j+150)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
-		  draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+350)*64))/327),15.0f,255,0,255);
-		  draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,255);
+		draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
+		draw_filledCircle(20+((sini((j+150)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
+		draw_filledCircle(20+((sini((j+100)*128))/234),20+((sini((j+350)*64))/327),15.0f,255,0,255);
+		draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*64))/327),15.0f,0,255,255);
 
-		  draw_filledCircle(20+((sini(j*64))/234),20+((sini(j*64))/327),15.0f,255,0,0);
-		  draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
-		  draw_filledCircle(20+((sini((j+150)*64))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
-		  draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+350)*128))/327),15.0f,255,0,255);
-		  draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,255,255);
-		  
+		draw_filledCircle(20+((sini(j*64))/234),20+((sini(j*64))/327),15.0f,255,0,0);
+		draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+150)*64))/327),15.0f,0,255,0);
+		draw_filledCircle(20+((sini((j+150)*64))/234),20+((sini((j+150)*128))/327),15.0f,0,0,255);
+		draw_filledCircle(20+((sini((j+100)*64))/234),20+((sini((j+350)*128))/327),15.0f,255,0,255);
+		draw_filledCircle(20+((sini((j+130)*128))/234),20+((sini((j+150)*128))/327),15.0f,0,255,255);
+
 		draw_filledCircle(touch_x,touch_y,15.0f,0,255,255);
-		draw_number_inv_8x6(100,100,10000/diff,4,'0');
+		draw_number_inv_8x6(100,100,10000/diff_buf,4,'0');
 		draw_number_inv_8x6(100,120,touch_x,4,'0');
 		draw_number_inv_8x6(100,130,touch_y,4,'0');
+
+		draw_button(30,30,200,1,"Textbutton",255,0,0,0,255,0);
+		draw_button(30,70,200,1,"Textbutton",255,0,0,0,255,0);
+		draw_button(30,110,200,1,"Textbutton",255,0,0,0,255,0);
+		draw_button(30,150,200,1,"Textbutton",255,0,0,0,255,0);
 		switch_layer();
 	}
 }

@@ -4,8 +4,8 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 
-#define LED_WIDTH 40
-#define LED_HEIGHT 30
+#define LED_WIDTH 320
+#define LED_HEIGHT 240
 
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);

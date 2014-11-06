@@ -1,0 +1,11 @@
+touchpad:
+- use interrupt
+- use dma for i2c transfers
+
+display:
+- use dma to clear memory
+- eventually use tripple buffering, to clear the buffer in the background using dma
+
+- FG / BG with blending
+* layer functionality from ltdc
+
